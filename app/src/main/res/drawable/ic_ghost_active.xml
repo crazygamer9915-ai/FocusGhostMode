@@ -5,17 +5,27 @@
     android:viewportWidth="100"
     android:viewportHeight="100">
   <!-- Glow ring -->
-  <path android:fillColor="#446650A4"
-    android:pathData="M50,5 C24,5 13,23 13,45 L13,82 L23,72 L33,82 L43,72 L50,82 L57,72 L67,82 L77,72 L87,82 L87,45 C87,23 76,5 50,5 Z"/>
+  <path
+      android:fillColor="#446650A4"
+      android:pathData="M50,5 C24,5 13,23 13,45 L13,82 L23,72 L33,82 L43,72 L50,82 L57,72 L67,82 L77,72 L87,82 L87,45 C87,23 76,5 50,5 Z"/>
   <!-- Ghost body -->
-  <path android:fillColor="#A794D8"
-    android:pathData="M50,10 C28,10 18,26 18,45 L18,78 L26,70 L34,78 L42,70 L50,78 L58,70 L66,78 L74,70 L82,78 L82,45 C82,26 72,10 50,10 Z"/>
-  <!-- Left eye (glowing) -->
-  <ellipse android:fillColor="#6650A4" android:centerX="37" android:centerY="42" android:radiusX="6" android:radiusY="7"/>
-  <!-- Right eye (glowing) -->
-  <ellipse android:fillColor="#6650A4" android:centerX="63" android:centerY="42" android:radiusX="6" android:radiusY="7"/>
+  <path
+      android:fillColor="#A794D8"
+      android:pathData="M50,10 C28,10 18,26 18,45 L18,78 L26,70 L34,78 L42,70 L50,78 L58,70 L66,78 L74,70 L82,78 L82,45 C82,26 72,10 50,10 Z"/>
+  <!-- Left eye glowing -->
+  <path
+      android:fillColor="#6650A4"
+      android:pathData="M31,38 C31,33 43,33 43,38 C43,46 31,46 31,38 Z"/>
+  <!-- Right eye glowing -->
+  <path
+      android:fillColor="#6650A4"
+      android:pathData="M57,38 C57,33 69,33 69,38 C69,46 57,46 57,38 Z"/>
   <!-- Eye shine left -->
-  <ellipse android:fillColor="#CCC2DC" android:centerX="39" android:centerY="39" android:radiusX="2.5" android:radiusY="2.5"/>
+  <path
+      android:fillColor="#CCC2DC"
+      android:pathData="M38,34 C38,31 42,31 42,34 C42,37 38,37 38,34 Z"/>
   <!-- Eye shine right -->
-  <ellipse android:fillColor="#CCC2DC" android:centerX="65" android:centerY="39" android:radiusX="2.5" android:radiusY="2.5"/>
+  <path
+      android:fillColor="#CCC2DC"
+      android:pathData="M64,34 C64,31 68,31 68,34 C68,37 64,37 64,34 Z"/>
 </vector>
