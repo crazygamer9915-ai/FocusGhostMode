@@ -26,20 +26,18 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingBinding
     private lateinit var prefs: GhostPreferences
 
-    private val requestPhonePermission = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { updatePermissionUI() }
+private val requestPhonePermission = registerForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions()
+) { updatePermissionUI() }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityOnboardingBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.title = "Setup Permissions"
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    binding = ActivityOnboardingBinding.inflate(layoutInflater)
+    setContentView(binding.root)
+    setSupportActionBar(binding.toolbar)
+    supportActionBar?.title = "Setup Permissions"
 
-        val isRevisit = prefs.hasCompletedOnboarding.also {
-            prefs = GhostPreferences(this)
-        }
+    prefs = GhostPreferences(this)
         if (prefs.hasCompletedOnboarding) {
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
