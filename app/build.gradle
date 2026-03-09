@@ -78,7 +78,7 @@ dependencies {
 
     // Glide for app icons
     implementation 'com.github.bumptech.glide:glide:4.16.0'
-    ksp 'com.github.bumptech.glide:ksp:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
     // WorkManager for background tasks
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
