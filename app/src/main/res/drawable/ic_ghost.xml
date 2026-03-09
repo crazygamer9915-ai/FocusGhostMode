@@ -5,14 +5,23 @@
     android:viewportWidth="100"
     android:viewportHeight="100">
   <!-- Ghost body -->
-  <path android:fillColor="#CCC2DC"
-    android:pathData="M50,10 C28,10 18,26 18,45 L18,78 L26,70 L34,78 L42,70 L50,78 L58,70 L66,78 L74,70 L82,78 L82,45 C82,26 72,10 50,10 Z"/>
+  <path
+      android:fillColor="#CCC2DC"
+      android:pathData="M50,10 C28,10 18,26 18,45 L18,78 L26,70 L34,78 L42,70 L50,78 L58,70 L66,78 L74,70 L82,78 L82,45 C82,26 72,10 50,10 Z"/>
   <!-- Left eye -->
-  <ellipse android:fillColor="#1A1A2E" android:centerX="37" android:centerY="42" android:radiusX="6" android:radiusY="7"/>
+  <path
+      android:fillColor="#1A1A2E"
+      android:pathData="M31,38 C31,33 43,33 43,38 C43,46 31,46 31,38 Z"/>
   <!-- Right eye -->
-  <ellipse android:fillColor="#1A1A2E" android:centerX="63" android:centerY="42" android:radiusX="6" android:radiusY="7"/>
+  <path
+      android:fillColor="#1A1A2E"
+      android:pathData="M57,38 C57,33 69,33 69,38 C69,46 57,46 57,38 Z"/>
   <!-- Eye shine left -->
-  <ellipse android:fillColor="#FFFFFF" android:centerX="39" android:centerY="39" android:radiusX="2" android:radiusY="2"/>
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M38,34 C38,32 41,32 41,34 C41,36 38,36 38,34 Z"/>
   <!-- Eye shine right -->
-  <ellipse android:fillColor="#FFFFFF" android:centerX="65" android:centerY="39" android:radiusX="2" android:radiusY="2"/>
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M64,34 C64,32 67,32 67,34 C67,36 64,36 64,34 Z"/>
 </vector>
