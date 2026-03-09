@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Focus Ghost Mode</string>
+    <string name="notification_listener_label">Ghost Notification Capture</string>
+    <string name="activate_ghost_mode">Activate Ghost Mode</string>
+    <string name="end_ghost_mode">End Ghost Mode</string>
+    <string name="ghost_mode_active">👻 Ghost Mode Active</string>
+    <string name="ghost_mode_subtitle_idle">Enter deep focus.\nYour phone goes ghost.</string>
+    <string name="ghost_mode_subtitle_active">Silently recording the world…\nYou are invisible.</string>
+</resources>
