@@ -60,15 +60,15 @@ interface CapturedEventDao {
     suspend fun getCallCount(sessionId: Long): Int
 
     @Query("""
-        SELECT appName, COUNT(*) as cnt 
+        SELECT appName
         FROM captured_events 
         WHERE sessionId = :sessionId AND eventType = 'NOTIFICATION' 
         GROUP BY appName 
-        ORDER BY cnt DESC 
+        ORDER BY COUNT(*) DESC 
         LIMIT 1
     """)
     suspend fun getMostActiveApp(sessionId: Long): String?
-
+   
     @Query("DELETE FROM captured_events WHERE sessionId = :sessionId")
     suspend fun deleteEventsForSession(sessionId: Long)
 }
