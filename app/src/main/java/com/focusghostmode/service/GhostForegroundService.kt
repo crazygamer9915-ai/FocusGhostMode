@@ -98,30 +98,43 @@ class GhostForegroundService : Service() {
     // ── Do Not Disturb ────────────────────────────────────────────────────────
 
     private fun enableDoNotDisturb() {
-        if (notificationManager.isNotificationPolicyAccessGranted) {
-            notificationManager.setInterruptionFilter(
-                NotificationManager.INTERRUPTION_FILTER_NONE
-            )
-            Log.d(TAG, "DND enabled")
-        } else {
-            // Fallback: mute ringer via AudioManager
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
-            Log.d(TAG, "Ringer muted (DND not granted)")
-        }
+    if (notificationManager.isNotificationPolicyAccessGranted) {
+        // Suppress ALL interruptions - no sounds, no popups, no vibrations
+        notificationManager.setInterruptionFilter(
+            NotificationManager.INTERRUPTION_FILTER_NONE
+        )
+        Log.d(TAG, "DND enabled - full silence")
+    } else {
+        // Fallback: mute ringer AND notifications via AudioManager
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
+        
+        // Also suppress notification sounds via stream volumes
+        audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0)
+        audioManager.setStreamVolume(AudioManager.STREAM_RING, 0, 0)
+        Log.d(TAG, "Audio streams muted (DND not granted)")
     }
+    
+    // Save previous volume levels to restore later
+    val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    prefs.savedNotifVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
+    prefs.savedRingVolume = audioManager.getStreamVolume(AudioManager.STREAM_RING)
+}
 
     private fun restoreAudio() {
-        if (notificationManager.isNotificationPolicyAccessGranted) {
-            notificationManager.setInterruptionFilter(
-                NotificationManager.INTERRUPTION_FILTER_ALL
-            )
-        } else {
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-        }
-        Log.d(TAG, "Audio restored")
+    if (notificationManager.isNotificationPolicyAccessGranted) {
+        notificationManager.setInterruptionFilter(
+            NotificationManager.INTERRUPTION_FILTER_ALL
+        )
+    } else {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        // Restore saved volumes
+        audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, prefs.savedNotifVolume, 0)
+        audioManager.setStreamVolume(AudioManager.STREAM_RING, prefs.savedRingVolume, 0)
     }
+    Log.d(TAG, "Audio restored")
+}
 
     // ── Notification ──────────────────────────────────────────────────────────
 
