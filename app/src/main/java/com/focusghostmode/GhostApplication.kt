@@ -14,3 +14,10 @@ class GhostApplication : Application() {
         Log.d("GhostApp", "Focus Ghost Mode started")
     }
 }
+var savedNotifVolume: Int
+    get() = prefs.getInt(KEY_NOTIF_VOL, 5)
+    set(value) = prefs.edit().putInt(KEY_NOTIF_VOL, value).apply()
+
+var savedRingVolume: Int
+    get() = prefs.getInt(KEY_RING_VOL, 5)
+    set(value) = prefs.edit().putInt(KEY_RING_VOL, value).apply()
