@@ -132,17 +132,38 @@ class MainActivity : AppCompatActivity() {
     // ── Ghost Mode Control ────────────────────────────────────────────────────
 
     private fun startGhostMode() {
-        if (!isNotificationListenerEnabled()) {
-            showNotificationListenerDialog()
-            return
-        }
-        startForegroundService(this, GhostForegroundService.startIntent(this))
-        prefs.isGhostModeActive = true
-        prefs.sessionStartTime = System.currentTimeMillis()
-        viewModel.setGhostModeActive(true)
-        Snackbar.make(binding.root, "👻 Ghost Mode activated. Focus up!", Snackbar.LENGTH_SHORT).show()
+    if (!isNotificationListenerEnabled()) {
+        showNotificationListenerDialog()
+        return
     }
+    
+    // Check DND permission — this is critical for blocking popup notifications
+    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+    if (!nm.isNotificationPolicyAccessGranted) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Allow Do Not Disturb Access")
+            .setMessage("To fully block popup notifications during focus (e.g. while watching Netflix), Ghost Mode needs Do Not Disturb access.\n\nTap 'Grant' to enable it — this is the most important permission.")
+            .setPositiveButton("Grant Access") { _, _ ->
+                startActivity(Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+            }
+            .setNegativeButton("Skip") { _, _ ->
+                // Start anyway with partial suppression
+                launchGhostMode()
+            }
+            .show()
+        return
+    }
+    
+    launchGhostMode()
+}
 
+private fun launchGhostMode() {
+    startForegroundService(this, GhostForegroundService.startIntent(this))
+    prefs.isGhostModeActive = true
+    prefs.sessionStartTime = System.currentTimeMillis()
+    viewModel.setGhostModeActive(true)
+    Snackbar.make(binding.root, "👻 Ghost Mode activated. Focus up!", Snackbar.LENGTH_SHORT).show()
+}
     private fun stopGhostMode() {
         val sessionId = prefs.activeSessionId
         prefs.lastEndedSessionId = sessionId
