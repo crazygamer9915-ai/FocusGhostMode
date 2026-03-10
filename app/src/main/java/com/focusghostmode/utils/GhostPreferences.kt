@@ -37,5 +37,7 @@ class GhostPreferences(context: Context) {
         private const val KEY_START_TIME = "start_time"
         private const val KEY_ONBOARDING_DONE = "onboarding_done"
         private const val KEY_LAST_SESSION_ID = "last_session_id"
+        private const val KEY_NOTIF_VOL = "notif_vol"
+        private const val KEY_RING_VOL = "ring_vol"
     }
 }
