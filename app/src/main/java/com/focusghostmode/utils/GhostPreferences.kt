@@ -3,9 +3,6 @@ package com.focusghostmode.utils
 import android.content.Context
 import android.content.SharedPreferences
 
-/**
- * Lightweight SharedPreferences wrapper for persistent app state.
- */
 class GhostPreferences(context: Context) {
 
     private val prefs: SharedPreferences =
@@ -30,6 +27,14 @@ class GhostPreferences(context: Context) {
     var lastEndedSessionId: Long
         get() = prefs.getLong(KEY_LAST_SESSION_ID, -1L)
         set(value) = prefs.edit().putLong(KEY_LAST_SESSION_ID, value).apply()
+
+    var savedNotifVolume: Int
+        get() = prefs.getInt(KEY_NOTIF_VOL, 5)
+        set(value) = prefs.edit().putInt(KEY_NOTIF_VOL, value).apply()
+
+    var savedRingVolume: Int
+        get() = prefs.getInt(KEY_RING_VOL, 5)
+        set(value) = prefs.edit().putInt(KEY_RING_VOL, value).apply()
 
     companion object {
         private const val KEY_GHOST_ACTIVE = "ghost_active"
