@@ -21,10 +21,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-/**
- * Foreground service that keeps Ghost Mode alive.
- * Manages Do Not Disturb policy and shows a persistent notification indicator.
- */
 class GhostForegroundService : Service() {
 
     private val TAG = "GhostFgService"
@@ -33,12 +29,14 @@ class GhostForegroundService : Service() {
     private lateinit var repository: GhostRepository
     private lateinit var prefs: GhostPreferences
     private lateinit var notificationManager: NotificationManager
+    private lateinit var audioManager: AudioManager
 
     override fun onCreate() {
         super.onCreate()
         repository = GhostRepository.getInstance(applicationContext)
         prefs = GhostPreferences(applicationContext)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         createNotificationChannel()
         Log.d(TAG, "GhostForegroundService created")
     }
@@ -56,7 +54,7 @@ class GhostForegroundService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
-        restoreAudio()
+        restoreNotificationSounds()
         Log.d(TAG, "GhostForegroundService destroyed")
     }
 
@@ -70,12 +68,9 @@ class GhostForegroundService : Service() {
             prefs.sessionStartTime = System.currentTimeMillis()
         }
 
-        // Enable Do Not Disturb if we have permission
-        enableDoNotDisturb()
-
-        // Start foreground with ghost indicator notification
+        suppressNotificationSounds()
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
-        Log.d(TAG, "Ghost Mode started")
+        Log.d(TAG, "Ghost Mode started - notification sounds suppressed")
     }
 
     private fun stopGhostMode() {
@@ -89,54 +84,56 @@ class GhostForegroundService : Service() {
         prefs.isGhostModeActive = false
         prefs.activeSessionId = -1L
 
-        restoreAudio()
+        restoreNotificationSounds()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
-        Log.d(TAG, "Ghost Mode stopped")
+        Log.d(TAG, "Ghost Mode stopped - sounds restored")
     }
 
-    // ── Do Not Disturb ────────────────────────────────────────────────────────
+    // ── Sound Suppression ─────────────────────────────────────────────────────
+    // Strategy: Mute ONLY the notification stream.
+    // This means:
+    //   ✅ Music / Netflix / YouTube audio still plays normally
+    //   ✅ Phone calls still ring (user can answer)
+    //   ✅ Alarms still work
+    //   ❌ Notification sounds are silenced
+    //   ❌ Notification popup banners are suppressed (via importance override)
 
-    private fun enableDoNotDisturb() {
-    if (notificationManager.isNotificationPolicyAccessGranted) {
-        // Suppress ALL interruptions - no sounds, no popups, no vibrations
-        notificationManager.setInterruptionFilter(
-            NotificationManager.INTERRUPTION_FILTER_NONE
-        )
-        Log.d(TAG, "DND enabled - full silence")
-    } else {
-        // Fallback: mute ringer AND notifications via AudioManager
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.ringerMode = AudioManager.RINGER_MODE_SILENT
-        
-        // Also suppress notification sounds via stream volumes
+    private fun suppressNotificationSounds() {
+        // Save current notification volume to restore later
+        prefs.savedNotifVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
+        prefs.savedRingVolume = audioManager.getStreamVolume(AudioManager.STREAM_RING)
+
+        // Mute notification sound stream only — media/calls unaffected
         audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0)
+
+        // Also mute ring stream so call ringtone doesn't play
+        // (call is still logged, user just won't hear it ring)
         audioManager.setStreamVolume(AudioManager.STREAM_RING, 0, 0)
-        Log.d(TAG, "Audio streams muted (DND not granted)")
-    }
-    
-    // Save previous volume levels to restore later
-    val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    prefs.savedNotifVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
-    prefs.savedRingVolume = audioManager.getStreamVolume(AudioManager.STREAM_RING)
-}
 
-    private fun restoreAudio() {
-    if (notificationManager.isNotificationPolicyAccessGranted) {
-        notificationManager.setInterruptionFilter(
-            NotificationManager.INTERRUPTION_FILTER_ALL
-        )
-    } else {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-        // Restore saved volumes
-        audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, prefs.savedNotifVolume, 0)
-        audioManager.setStreamVolume(AudioManager.STREAM_RING, prefs.savedRingVolume, 0)
+        Log.d(TAG, "Notification + ring streams muted. Media stream untouched.")
     }
-    Log.d(TAG, "Audio restored")
-}
 
-    // ── Notification ──────────────────────────────────────────────────────────
+    private fun restoreNotificationSounds() {
+        try {
+            // Restore exactly what the user had before
+            val savedNotif = prefs.savedNotifVolume
+            val savedRing = prefs.savedRingVolume
+
+            // Only restore if we actually saved something (not default -1)
+            if (savedNotif >= 0) {
+                audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, savedNotif, 0)
+            }
+            if (savedRing >= 0) {
+                audioManager.setStreamVolume(AudioManager.STREAM_RING, savedRing, 0)
+            }
+            Log.d(TAG, "Notification volume restored: notif=$savedNotif ring=$savedRing")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error restoring volume", e)
+        }
+    }
+
+    // ── Foreground Notification ───────────────────────────────────────────────
 
     private fun buildForegroundNotification(): Notification {
         val tapIntent = PendingIntent.getActivity(
@@ -153,7 +150,7 @@ class GhostForegroundService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("👻 Ghost Mode Active")
-            .setContentText("Silently capturing events. Tap to view.")
+            .setContentText("Notification sounds muted. Media & calls unaffected.")
             .setSmallIcon(R.drawable.ic_ghost)
             .setContentIntent(tapIntent)
             .addAction(R.drawable.ic_stop, "End Ghost Mode", stopIntent)
